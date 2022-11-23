@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    hostname: rabbitmq
+    ports:
+        - 5672:5672
+        - 15672:15672
+    networks:
+        - alarm_network
+  app:
+    build: .
+    container_name: 'alarm'
+    ports:
+      - 8080:8080
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+    networks:
+        - alarm_network
+    depends_on:
+      - rabbitmq
+    links:
+      - rabbitmq
+
+networks:
+  alarm_network:
