@@ -13,9 +13,9 @@ func init() {
 func main() {
 	r := gin.Default()
 	telegramController := controllers.TelegramController{}
-	
+
 	r.GET("/telegram/ping", telegramController.Ping)
 	r.POST("/telegram/", telegramController.Dispatch)
 
-	r.Run()
+	r.Run(":8088")
 }
