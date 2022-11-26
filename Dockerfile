@@ -1,18 +1,37 @@
 FROM golang:1.18-bullseye
 
-RUN apt-get update
-RUN apt-get install -y supervisor # Installing supervisord
-
+# Working Directory
 RUN mkdir /src
 WORkDIR /src
 
-ADD . .
+# Create log directory inside the container for iris and file logging
+RUN mkdir -p log
+RUN mkdir -p log/filebeat
+
+# Install required files for filebeat and iris
+RUN apt-get update && \
+    apt-get -y install wget && \
+    apt-get -y install bash && \
+    apt-get -y install nano && \
+    apt-get -y install telnet && \    
+    apt-get -y install supervisor
+
+# Copy files
+ADD src .
 RUN go mod download
 
-ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf 
+# add supervisor conf
+ADD conf.d/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-RUN go build cmd/server/server.go
-RUN go build cmd/worker/worker.go
+# Setting up environment variable
+ENV TZ="Asia/Tehran"
+
+# Expose port
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/bin/supervisord"]
+# build
+RUN go build -o build/ cmd/server/server.go
+RUN go build -o build/ cmd/worker/worker.go
+
+# Moved to compose
+# ENTRYPOINT ["/usr/bin/supervisord"]
