@@ -29,7 +29,7 @@ docker compose up -d
 ```
 
 ## Health check
-`curl -f {YOUR_SERVER_IP}:8080/telegram/ping`
+`curl -f {YOUR_SERVER_IP}:8088/telegram/ping`
 
 This should return response below with `200 OK` status code:
 ```json
