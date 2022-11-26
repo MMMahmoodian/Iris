@@ -5,7 +5,6 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: 'iris-rabbitmq'
     hostname: iris-rabbitmq
-    entrypoint: ["python","main.py","--module"]
     ports:
         - 5672:5672
         - 15672:15672
@@ -20,7 +19,7 @@ services:
         - iris_network
 
   iris-app:
-    build: .
+    image: registry.dataak.com:5000/iris:${IMAGE_TAG}
     container_name: 'iris-app'
     entrypoint: ["/usr/bin/supervisord"]    
     ports:

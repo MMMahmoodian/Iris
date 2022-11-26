@@ -55,14 +55,14 @@ build-imag-prod:
 deploy-dev:
   stage: deploy
   variables:
-    MANAGERCRAWL: 172.20.20.128
+    MANAGERTEST: 172.20.20.128
   rules:
     - if: '$CI_COMMIT_REF_NAME == "development"'
   script:
     - *ssh-server
     - *registry-login
     - rsync -av --progress -e 'ssh -p 10984 -i ~/.ssh/id_rsa' htd@$CONFIG_SERVER_PUB:/home/htd/nginx/global_configs/iris/development/.env src/.env
-    - docker -H ssh://htd@$MANAGERCRAWL stack deploy --with-registry-auth -c docker-compose.yml iris
+    - docker -H ssh://htd@$MANAGERTEST stack deploy --with-registry-auth -c docker-compose.yml iris
     - sleep 15
   tags:
     - manshoor
