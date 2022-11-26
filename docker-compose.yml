@@ -5,7 +5,6 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: 'iris-rabbitmq'
     hostname: iris-rabbitmq
-    entrypoint: ["python","main.py","--module"]
     ports:
         - 5672:5672
         - 15672:15672
