@@ -35,7 +35,7 @@ build-imag-dev:
     - docker build --tag $REGISTRY_URL/iris:${IMAGE_TAG} .
     - docker push $REGISTRY_URL/iris:${IMAGE_TAG}
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "development"'
+    - if: '$CI_COMMIT_REF_NAME == "development" && $CI_PIPELINE_SOURCE == "push"'
   tags:
     - manshoor
 
@@ -48,7 +48,7 @@ build-imag-prod:
     - docker build --tag $REGISTRY_URL/iris:${IMAGE_TAG} .
     - docker push $REGISTRY_URL/iris:${IMAGE_TAG}
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "main"'
+    - if: '$CI_COMMIT_REF_NAME == "main" && $CI_PIPELINE_SOURCE == "push"'
   tags:
     - manshoor
 
@@ -57,12 +57,12 @@ deploy-dev:
   variables:
     MANAGERTEST: 172.20.20.128
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "development"'
+    - if: '$CI_COMMIT_REF_NAME == "development" && $CI_PIPELINE_SOURCE == "push"'
   script:
     - *ssh-server
     - *registry-login
     - rsync -av --progress -e 'ssh -p 10984 -i ~/.ssh/id_rsa' htd@$CONFIG_SERVER_PUB:/home/htd/nginx/global_configs/iris/development/.env src/.env
-    - docker -H ssh://htd@$MANAGERTEST stack deploy --with-registry-auth -c docker-compose.yml iris
+    - docker -H ssh://htd@$MANAGERTEST stack deploy --with-registry-auth -c docker-compose-swarm.yml iris
     - sleep 15
   tags:
     - manshoor
@@ -72,12 +72,12 @@ deploy-prod:
   variables:
     MANAGERCRAWL: 82.102.9.113
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "main"'
+    - if: '$CI_COMMIT_REF_NAME == "main" && $CI_PIPELINE_SOURCE == "push"'
   script:
     - *ssh-server
     - *registry-login
     - rsync -av --progress -e 'ssh -p 10984 -i ~/.ssh/id_rsa' htd@$CONFIG_SERVER_PUB:/home/htd/nginx/global_configs/iris/master/.env src/.env
-    - docker -H ssh://htd@$MANAGERCRAWL stack deploy --with-registry-auth -c docker-compose.yml iris
+    - docker -H ssh://htd@$MANAGERCRAWL stack deploy --with-registry-auth -c docker-compose-swarm.yml iris
     - sleep 15
   tags:
     - manshoor    
