@@ -1,6 +1,7 @@
 package rabbit_mq
 
 import (
+	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"os"
 )
@@ -10,7 +11,12 @@ const (
 )
 
 func Connection() (*amqp.Connection, error) {
-	return amqp.Dial(os.Getenv("RABBIT_MQ_CONNECTION"))
+	user := os.Getenv("RABBITMQ_USER")
+	pw := os.Getenv("RABBITMQ_PASSWORD")
+	host := os.Getenv("RABBITMQ_HOST")
+	port := os.Getenv("RABBITMQ_PORT")
+	connection := fmt.Sprintf("amqp://%s:%s@%s:%s/", user, pw, host, port)
+	return amqp.Dial(connection)
 }
 
 func Channel(conn *amqp.Connection) (*amqp.Channel, error) {
