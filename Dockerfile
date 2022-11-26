@@ -27,7 +27,7 @@ ADD conf.d/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ENV TZ="Asia/Tehran"
 
 # Expose port
-EXPOSE 8080
+EXPOSE 8088
 
 # build
 RUN go build -o build/ cmd/server/server.go

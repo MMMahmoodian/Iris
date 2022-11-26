@@ -26,7 +26,7 @@ services:
     container_name: 'iris-app'
     entrypoint: ["/usr/bin/supervisord"]    
     ports:
-      - 8080:8080
+      - 8088:8088
     environment:
       - RABBITMQ_HOST=iris-rabbitmq
     depends_on:

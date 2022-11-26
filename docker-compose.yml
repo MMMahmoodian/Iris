@@ -16,7 +16,7 @@ services:
     build: .
     container_name: 'iris-app'
     ports:
-      - 8080:8080
+      - 8088:8088
     environment:
       - RABBITMQ_HOST=iris-rabbitmq
     networks:
