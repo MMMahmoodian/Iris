@@ -1,0 +1,83 @@
+image: dataak-dind:latest
+
+variables:
+  REGISTRY_URL: "registry.dataak.com:5000"
+
+stages:
+  - build
+  - deploy
+
+before_script:
+  - printf "Deployment starting for project ${CI_PROJECT_TITLE}\n";
+  - printf "Branch ${CI_COMMIT_REF_NAME}\n";
+  - printf "::JobUrl=${CI_JOB_URL}\n\n";
+  - export IMAGE_TAG=${CI_COMMIT_REF_NAME}
+
+.ssh-server: &ssh-server
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - eval `ssh-agent -s`
+  - echo -e "Host *\n\tStrictHostKeyChecking no\n\tPort 10916\n" > ~/.ssh/config
+  - echo "$SWARM_KEY" > ~/.ssh/id_rsa
+  - chmod 644 ~/.ssh/config
+  - chmod 600 ~/.ssh/id_rsa
+    
+.registry-login: &registry-login
+  - mkdir ~/.docker
+  - echo "${DOCKER_AUTH_CONFIG}" > ~/.docker/config.json
+
+build-imag-dev:
+  stage: build
+  script:
+    - *ssh-server  
+    - *registry-login
+    - rsync -av --progress -e 'ssh -p 10984 -i ~/.ssh/id_rsa' htd@$CONFIG_SERVER_PUB:/home/htd/nginx/global_configs/iris/development/.env src/.env
+    - docker build --tag $REGISTRY_URL/iris:${IMAGE_TAG} .
+    - docker push $REGISTRY_URL/iris:${IMAGE_TAG}
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "development"'
+  tags:
+    - manshoor
+
+build-imag-prod:
+  stage: build
+  script:
+    - *ssh-server  
+    - *registry-login
+    - rsync -av --progress -e 'ssh -p 10984 -i ~/.ssh/id_rsa' htd@$CONFIG_SERVER_PUB:/home/htd/nginx/global_configs/iris/master/.env src/.env
+    - docker build --tag $REGISTRY_URL/iris:${IMAGE_TAG} .
+    - docker push $REGISTRY_URL/iris:${IMAGE_TAG}
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "main"'
+  tags:
+    - manshoor
+
+deploy-dev:
+  stage: deploy
+  variables:
+    MANAGERCRAWL: 172.20.20.128
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "development"'
+  script:
+    - *ssh-server
+    - *registry-login
+    - rsync -av --progress -e 'ssh -p 10984 -i ~/.ssh/id_rsa' htd@$CONFIG_SERVER_PUB:/home/htd/nginx/global_configs/iris/development/.env src/.env
+    - docker -H ssh://htd@$MANAGERCRAWL stack deploy --with-registry-auth -c docker-compose.yml iris
+    - sleep 15
+  tags:
+    - manshoor
+
+deploy-prod:
+  stage: deploy
+  variables:
+    MANAGERCRAWL: 82.102.9.113
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "main"'
+  script:
+    - *ssh-server
+    - *registry-login
+    - rsync -av --progress -e 'ssh -p 10984 -i ~/.ssh/id_rsa' htd@$CONFIG_SERVER_PUB:/home/htd/nginx/global_configs/iris/master/.env src/.env
+    - docker -H ssh://htd@$MANAGERCRAWL stack deploy --with-registry-auth -c docker-compose.yml iris
+    - sleep 15
+  tags:
+    - manshoor    
