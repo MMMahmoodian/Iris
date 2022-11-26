@@ -2,7 +2,7 @@ FROM golang:1.18-bullseye
 
 # Working Directory
 RUN mkdir /src
-WORkDIR /src
+WORKDIR /src
 
 # Create log directory inside the container for iris and file logging
 RUN mkdir -p log
