@@ -26,18 +26,18 @@ before_script:
   - mkdir ~/.docker
   - echo "${DOCKER_AUTH_CONFIG}" > ~/.docker/config.json
 
-build-imag-dev:
-  stage: build
-  script:
-    - *ssh-server  
-    - *registry-login
-    - rsync -av --progress -e 'ssh -p 10984 -i ~/.ssh/id_rsa' htd@$CONFIG_SERVER_PUB:/home/htd/nginx/global_configs/iris/development/.env src/.env
-    - docker build --tag $REGISTRY_URL/iris:${IMAGE_TAG} .
-    - docker push $REGISTRY_URL/iris:${IMAGE_TAG}
-  rules:
-    - if: '$CI_COMMIT_REF_NAME == "development" && $CI_PIPELINE_SOURCE == "push"'
-  tags:
-    - manshoor
+# build-imag-dev:
+#   stage: build
+#   script:
+#     - *ssh-server  
+#     - *registry-login
+#     - rsync -av --progress -e 'ssh -p 10984 -i ~/.ssh/id_rsa' htd@$CONFIG_SERVER_PUB:/home/htd/nginx/global_configs/iris/development/.env src/.env
+#     - docker build --tag $REGISTRY_URL/iris:${IMAGE_TAG} .
+#     - docker push $REGISTRY_URL/iris:${IMAGE_TAG}
+#   rules:
+#     - if: '$CI_COMMIT_REF_NAME == "development" && $CI_PIPELINE_SOURCE == "push"'
+#   tags:
+#     - manshoor
 
 build-imag-prod:
   stage: build
@@ -52,20 +52,20 @@ build-imag-prod:
   tags:
     - manshoor
 
-deploy-dev:
-  stage: deploy
-  variables:
-    MANAGERTEST: 172.20.20.128
-  rules:
-    - if: '$CI_COMMIT_REF_NAME == "development" && $CI_PIPELINE_SOURCE == "push"'
-  script:
-    - *ssh-server
-    - *registry-login
-    - rsync -av --progress -e 'ssh -p 10984 -i ~/.ssh/id_rsa' htd@$CONFIG_SERVER_PUB:/home/htd/nginx/global_configs/iris/development/.env src/.env
-    - docker -H ssh://htd@$MANAGERTEST stack deploy --with-registry-auth -c docker-compose-swarm.yml iris
-    - sleep 15
-  tags:
-    - manshoor
+# deploy-dev:
+#   stage: deploy
+#   variables:
+#     MANAGERTEST: 172.20.20.128
+#   rules:
+#     - if: '$CI_COMMIT_REF_NAME == "development" && $CI_PIPELINE_SOURCE == "push"'
+#   script:
+#     - *ssh-server
+#     - *registry-login
+#     - rsync -av --progress -e 'ssh -p 10984 -i ~/.ssh/id_rsa' htd@$CONFIG_SERVER_PUB:/home/htd/nginx/global_configs/iris/development/.env src/.env
+#     - docker -H ssh://htd@$MANAGERTEST stack deploy --with-registry-auth -c docker-compose-swarm.yml iris
+#     - sleep 15
+#   tags:
+#     - manshoor
 
 deploy-prod:
   stage: deploy
@@ -80,4 +80,4 @@ deploy-prod:
     - docker -H ssh://htd@$MANAGERCRAWL stack deploy --with-registry-auth -c docker-compose-swarm.yml iris
     - sleep 15
   tags:
-    - manshoor    
+    - manshoor
