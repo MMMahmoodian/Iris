@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	TelegramQueue string = "RABBIT_MQ_TELEGRAM_QUEUE"
+	TelegramQueue string = "RABBITMQ_TELEGRAM_QUEUE"
 )
 
 func Connection() (*amqp.Connection, error) {
