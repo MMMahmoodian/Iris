@@ -6,7 +6,7 @@ import (
 )
 
 func Initialize() {
-	err := godotenv.Load("../.env")
+	err := godotenv.Load("/src/.env")
 	if err != nil {
 		log.Fatalf("Loading .env failed. Err: %s", err)
 	}
